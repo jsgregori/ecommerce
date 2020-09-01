@@ -16,6 +16,10 @@ module.exports= (sequelize, dataType) => {
         id_user: {
              type: dataType.INTEGER,
              allowNull: false
+        },
+        address: {
+            type: dataType.STRING,
+            allowNull: false
         }
     };
  

@@ -1,18 +1,27 @@
-const fs = require('fs');
-const path = require('path');
-
-const usersFilePath = path.join(__dirname, '../data/users.json');
-const users = JSON.parse(fs.readFileSync(usersFilePath, 'utf-8'));
 
 function userMiddleware(req, res, next){
-    if(req.cookies.user != undefined){
-        req.session.user = req.cookies.user;
-        
-        const email = req.session.user;
-        user = users.find(user => user.email == email);
-        req.session.category = user.category;
+
+    console.log(`USER MIDDLEWARE ------------------------------------`);
+    if(req.session.user != undefined){
+
+        // if(req.session.category == 'admin'){
+        //     next();
+        // } else {
+        //     res.render('login', {
+		// 		error: 'Ingrese como administrador',
+		// 		user: req.session.user
+		// 	});
+        // }
+        console.log('NO HAY SESIÓN INICIADA');
+        console.log(`EL USUARIO ES: ${req.session.user}`);
+        next();
+    } else {
+        console.log('DEBE INICIAR SESIÓN');
+        // res.json({
+        //     status: 'como salmónx'
+        // })
+        res.redirect('/users/login/');
     }
-    next();
 }
 
 module.exports = userMiddleware;

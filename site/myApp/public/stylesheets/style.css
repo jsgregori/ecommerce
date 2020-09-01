@@ -375,12 +375,6 @@ form input, select, textarea {
   background-color: #FFFFFF;
 } */
 
-.error {
-  margin: 0px;
-  color: red;
-  font-size: x-small;
-}
-
 /* mejoras view login */
 
 /* .login_container {
@@ -395,6 +389,12 @@ form input, select, textarea {
 
 .container_error {
   height: 20px;
+}
+
+.container_error .error {
+  margin: 0px;
+  color: red;
+  font-size: x-small;
 }
 
 .checkbox_remember {
