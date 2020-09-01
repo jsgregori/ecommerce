@@ -5,7 +5,7 @@ var cookieParser = require('cookie-parser');                // Depenencia para g
 var logger = require('morgan');
 const methodOverride = require('method-override');          // Dependencia para gestionar métodos PUT/DELETE
 const session = require('express-session');                 // Dependencia para gestionar sessiones
-const userMiddleware = require('./​middlewares​/userMiddleware');
+const loginMiddleware = require('./​middlewares​/loginMiddleware');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -32,7 +32,7 @@ app.use(session({
   saveUninitialized: true
 }));
 
-app.use(userMiddleware);
+app.use(loginMiddleware);             // este middleware aquí no está haciendo nada
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);

@@ -15,9 +15,9 @@
     <main>
         <div class="container">
             <div class="row justify-content-center">
-                <div class="col-md-9">
+                <div class="col-md-5">      <!--  <div class="col-md-9"> -->
 
-                    <div class="container-fluid carrito">
+                    <div class="carrito card p-4">
 
                         <!-- orignal -->
                         <!-- <article class="row product">
@@ -44,6 +44,18 @@
                         </article> -->
                         <!-- original -->
 
+                        <label for="address">Dirección de envio</label>
+                        <input type="text" name="address" id="address" class="form-control" required="required">
+                        <label for="creditcard">Número de tarjeta</label>
+                        <input type="text" name="creditcard" id="creditcard" class="form-control" required="required">
+                        <label for="name">Name</label>
+                        <input type="text" name="name" id="name" class="form-control" required="required">
+                        <label for="date">Fecha de expiración</label>
+                        <input type="date" name="date" id="date" class="form-control" required="required">
+                        <label for="cvc">Código de seguridad</label>
+                        <input type="text" name="cvc" id="cvc" class="form-control" required="required">
+                        <button type="button" class="btn btn-primary" id="back">Volver</button>
+                        <button type="button" class="btn btn-primary" id="pay">Comprar</button>
                     </div>
 
                     <div class="total">
@@ -51,7 +63,7 @@
                     </div>
 
                     <div>
-                        <button type="button" class="btn btn-primary" id="pay">Ir a pagar</button>
+                        <button type="button" class="btn btn-primary" id="pay">Comprar</button>
                     </div>
 
                 </div>
@@ -63,7 +75,7 @@
 
     <%- include('./partials/footer') %>
 
-    <script src="javascripts/cart.js"></script>
+    <!-- <script src="javascripts/cart.js"></script> -->
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
         integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
         crossorigin="anonymous"></script>

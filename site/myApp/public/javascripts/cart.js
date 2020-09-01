@@ -200,6 +200,103 @@ window.onload = function () {
             total += element.total * data.data.price;
         }
 
+        // PROCESS PAYMENT
+
+        function processPayment() {
+            cart.innerHTML =
+                `<label for="address">Dirección de envio</label>
+             <input type="text" name="address" id="address" class="form-control" required="required">
+             <label for="creditcard">Número de tarjeta</label>
+             <input type="text" name="creditcard" id="creditcard" class="form-control" required="required">
+             <label for="name">Name</label>
+             <input type="text" name="name" id="name" class="form-control" required="required">
+             <label for="date">Fecha de expiración</label>
+             <input type="date" name="date" id="date" class="form-control" required="required">
+             <label for="cvc">Código de seguridad</label>
+             <input type="text" name="cvc" id="cvc" class="form-control" required="required">
+             <br>
+             <button type="button" class="btn btn-primary" id="payment">Pagar</button>`;
+
+            cart.classList.add('card');
+            cart.classList.add('p-4');
+            cart.parentElement.classList.add('col-md-5');
+            cart.parentElement.classList.remove('col-md-9');
+            payButton.style.display = 'none';
+
+            var payment = document.querySelector("#payment");
+            var shippingAddress = document.querySelector('#address');
+            var cardNumber = document.querySelector('#creditcard');
+            var cardName = document.querySelector('#name');
+            var cardExpire = document.querySelector('#date');
+            var cardCvc = document.querySelector('#cvc');
+            
+
+            payment.addEventListener("click", function (e) {
+                e.preventDefault();
+
+                if (sessionStorage.getItem("cart")) {
+                    var arrayCart = JSON.parse(sessionStorage.getItem("cart"));
+
+                    console.log(arrayCart);
+
+                    var carrito = {
+                        cart: arrayCart,
+                        shipping: shippingAddress.value,
+                        payment: {
+                            card: cardNumber.value,
+                            name: cardName.value,
+                            date: cardExpire.value,
+                            cvc: cardCvc.value
+                        }
+                    }
+
+                    if (arrayCart.length != 0) {
+
+                        fetch(`http://localhost:3000/cart/pay`, {
+                            method: 'POST',
+                            body: JSON.stringify(carrito),   //body: sessionStorage.getItem("cart")
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        }).then(function (response) {
+                            if (response.redirected) {
+                                window.location.href = response.url;
+                            }
+                            return response.json();
+                        })                //}).then(response => response.json())
+                            .then(data => {
+                                console.log(data);
+                                sessionStorage.removeItem('cart');
+                                purchaseSuccessful();
+                            })
+                            .catch((error) => {
+                                // console.error('Error:', error);
+                                console.log("NOK");
+                                console.log(error);
+                            });
+                    } else {
+                        alert('NO HAY NADA EN EL CARRITO');
+                    }
+                } else {
+                    alert('NO HAY NADA EN EL CARRITO');
+                }
+
+
+
+
+            })
+
+
+        }
+
+        // THE PURCHASE WAS SUCCESSFUL
+
+        function purchaseSuccessful(){
+            cart.innerHTML =
+                `<p>La compra se realizó con éxito</p>`;
+
+        }
+
         var removeProduct = document.querySelectorAll(".removeProduct");
         var lessProduct = document.querySelectorAll(".lessProduct");
         var moreProduct = document.querySelectorAll(".moreProduct");
@@ -264,33 +361,7 @@ window.onload = function () {
         payButton.addEventListener("click", function (e) {
             e.preventDefault();
 
-
-            if (sessionStorage.getItem("cart")) {
-                var arrayCart = JSON.parse(sessionStorage.getItem("cart"));
-
-                if (arrayCart.length != 0) {
-                    alert("REALIZAR LA COMPRA");
-                    fetch(`http://localhost:3000/cart/pay`, {
-                        method: 'POST',
-                        body: sessionStorage.getItem("cart"),
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    }).then(response => response.json())
-                        .then(data => {
-                            console.log('Success:', data);
-                            console.log("OK");
-                        })
-                        .catch((error) => {
-                            console.error('Error:', error);
-                            console.log("NOK");
-                        });
-                } else {
-                    alert('NO HAY NADA EN EL CARRITO');
-                }
-            } else {
-                alert('NO HAY NADA EN EL CARRITO');
-            }
+            processPayment();
 
         })
 
