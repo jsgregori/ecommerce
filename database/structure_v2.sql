@@ -77,3 +77,7 @@ ADD CONSTRAINT `id`
   REFERENCES `veterinaria`.`categorias` (`id`)
   ON DELETE NO ACTION
   ON UPDATE NO ACTION;
+  
+
+ALTER TABLE ordenes
+ADD address VARCHAR(100) NOT NULL;
