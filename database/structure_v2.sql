@@ -81,3 +81,6 @@ ADD CONSTRAINT `id`
 
 ALTER TABLE ordenes
 ADD address VARCHAR(100) NOT NULL;
+
+ALTER TABLE usuarios
+ADD favorites VARCHAR(100);

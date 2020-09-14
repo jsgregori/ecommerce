@@ -103,6 +103,77 @@ window.onload = function () {
         }
     }
 
+    async function updateFav() {
+
+        await fetch("/users/favorite/")
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (dataDecode) {
+                // console.log(dataDecode);
+
+                var arrayFavorites = dataDecode.favorites.split(",");
+                console.log(arrayFavorites);
+
+                for (i = 0; i < favorites.length; i++) {
+                    var productId = favorites[i].parentNode.parentNode.querySelector(".productId").value;
+
+                    if (!arrayFavorites.includes(productId)) {
+                        favorites[i].innerHTML = `<svg width="25px" height="25px" viewBox="0 0 16 16" class="bi bi-star" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.523-3.356c.329-.314.158-.888-.283-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767l-3.686 1.894.694-3.957a.565.565 0 0 0-.163-.505L1.71 6.745l4.052-.576a.525.525 0 0 0 .393-.288l1.847-3.658 1.846 3.658a.525.525 0 0 0 .393.288l4.052.575-2.906 2.77a.564.564 0 0 0-.163.506l.694 3.957-3.686-1.894a.503.503 0 0 0-.461 0z"/>
+                            </svg>`;
+
+                    } else {
+                        favorites[i].innerHTML = `<svg width="25px" height="25px" viewBox="0 0 16 16" class="bi bi-star-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.283.95l-3.523 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
+                            </svg>`;
+                    }
+                }
+            })
+            .catch(function (error) {
+                // si falla la carga porque no se procesó la petición o si hace un redirect por no estás logueado
+            });
+
+
+    }
+
+    async function addToFavorites(id, node) {
+
+        console.log(`agregar el producto con id:${id} a favoritos`);
+
+        await fetch('/users/favorite/', {
+            method: 'POST',
+            body: JSON.stringify({ id: id }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(function (response) {
+            if (response.redirected) {
+                window.location.href = response.url;
+            }
+            return response.json();
+        }).then(data => {
+
+            if (data.added === true) {
+                node.innerHTML = `<svg width="25px" height="25px" viewBox="0 0 16 16" class="bi bi-star-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.283.95l-3.523 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
+                    </svg>`;
+            } else {
+                node.innerHTML = `<svg width="25px" height="25px" viewBox="0 0 16 16" class="bi bi-star" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.523-3.356c.329-.314.158-.888-.283-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767l-3.686 1.894.694-3.957a.565.565 0 0 0-.163-.505L1.71 6.745l4.052-.576a.525.525 0 0 0 .393-.288l1.847-3.658 1.846 3.658a.525.525 0 0 0 .393.288l4.052.575-2.906 2.77a.564.564 0 0 0-.163.506l.694 3.957-3.686-1.894a.503.503 0 0 0-.461 0z"/>
+                    </svg>`;
+            }
+
+        }).catch((error) => {
+            console.log("NOK");
+            console.log(error);
+        });
+
+
+
+    }
+
+    // UPDATE CART FROM A PARTICULAR PRODUCT
     function updateProductCart() {
 
         if (sessionStorage.getItem("cart")) {
@@ -152,10 +223,110 @@ window.onload = function () {
         }
     }
 
+    // THE PURCHASE WAS SUCCESSFUL
+    function purchaseSuccessful() {
+        updateMyCart();
+        cart.innerHTML =
+            `<p>La compra se realizó con éxito</p>`;
+
+    }
+
+    // PROCESS PAYMENT
+    function processPayment() {
+        cart.innerHTML =
+            `<label for="address">Dirección de envio</label>
+                 <input type="text" name="address" id="address" class="form-control" required="required">
+                 <label for="creditcard">Número de tarjeta</label>
+                 <input type="text" name="creditcard" id="creditcard" class="form-control" required="required">
+                 <label for="name">Name</label>
+                 <input type="text" name="name" id="name" class="form-control" required="required">
+                 <label for="date">Fecha de expiración</label>
+                 <input type="date" name="date" id="date" class="form-control" required="required">
+                 <label for="cvc">Código de seguridad</label>
+                 <input type="text" name="cvc" id="cvc" class="form-control" required="required">
+                 <br>
+                 <button type="button" class="btn btn-primary" id="payment">Pagar</button>`;
+
+        cart.classList.add('card');
+        cart.classList.add('p-4');
+        cart.parentElement.classList.add('col-md-5');
+        cart.parentElement.classList.remove('col-md-9');
+        payButton.style.display = 'none';
+
+        var payment = document.querySelector("#payment");
+        var shippingAddress = document.querySelector('#address');
+        var cardNumber = document.querySelector('#creditcard');
+        var cardName = document.querySelector('#name');
+        var cardExpire = document.querySelector('#date');
+        var cardCvc = document.querySelector('#cvc');
+
+
+        payment.addEventListener("click", function (e) {
+            e.preventDefault();
+
+            if (sessionStorage.getItem("cart")) {
+                var arrayCart = JSON.parse(sessionStorage.getItem("cart"));
+
+                console.log(arrayCart);
+
+                var carrito = {
+                    cart: arrayCart,
+                    shipping: shippingAddress.value,
+                    payment: {
+                        card: cardNumber.value,
+                        name: cardName.value,
+                        date: cardExpire.value,
+                        cvc: cardCvc.value
+                    }
+                }
+
+                if (arrayCart.length != 0) {
+
+                    fetch(`http://localhost:3000/cart/pay`, {
+                        method: 'POST',
+                        body: JSON.stringify(carrito),   //body: sessionStorage.getItem("cart")
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    }).then(function (response) {
+                        if (response.redirected) {
+                            window.location.href = response.url;
+                        }
+                        return response.json();
+                    })                //}).then(response => response.json())
+                        .then(data => {
+                            console.log(data);
+                            sessionStorage.removeItem('cart');
+                            purchaseSuccessful();
+                        })
+                        .catch((error) => {
+                            // console.error('Error:', error);
+                            console.log("NOK");
+                            console.log(error);
+                        });
+                } else {
+                    alert('NO HAY NADA EN EL CARRITO');
+                }
+            } else {
+                alert('NO HAY NADA EN EL CARRITO');
+            }
+
+
+
+
+        })
+
+
+    }
+
     // SHOW CART WITH SELECTED PRODUCTS
     async function showCart(arrayCart) {
 
+        emptyCart();
+
         var total = 0;
+
+        // acá tengo que poner ocultar a carrito vacio
 
         for (const element of arrayCart) {
             const data = await (await fetch(`http://localhost:3000/api/products/${element.id}`)).json();
@@ -200,102 +371,6 @@ window.onload = function () {
             total += element.total * data.data.price;
         }
 
-        // PROCESS PAYMENT
-
-        function processPayment() {
-            cart.innerHTML =
-                `<label for="address">Dirección de envio</label>
-             <input type="text" name="address" id="address" class="form-control" required="required">
-             <label for="creditcard">Número de tarjeta</label>
-             <input type="text" name="creditcard" id="creditcard" class="form-control" required="required">
-             <label for="name">Name</label>
-             <input type="text" name="name" id="name" class="form-control" required="required">
-             <label for="date">Fecha de expiración</label>
-             <input type="date" name="date" id="date" class="form-control" required="required">
-             <label for="cvc">Código de seguridad</label>
-             <input type="text" name="cvc" id="cvc" class="form-control" required="required">
-             <br>
-             <button type="button" class="btn btn-primary" id="payment">Pagar</button>`;
-
-            cart.classList.add('card');
-            cart.classList.add('p-4');
-            cart.parentElement.classList.add('col-md-5');
-            cart.parentElement.classList.remove('col-md-9');
-            payButton.style.display = 'none';
-
-            var payment = document.querySelector("#payment");
-            var shippingAddress = document.querySelector('#address');
-            var cardNumber = document.querySelector('#creditcard');
-            var cardName = document.querySelector('#name');
-            var cardExpire = document.querySelector('#date');
-            var cardCvc = document.querySelector('#cvc');
-            
-
-            payment.addEventListener("click", function (e) {
-                e.preventDefault();
-
-                if (sessionStorage.getItem("cart")) {
-                    var arrayCart = JSON.parse(sessionStorage.getItem("cart"));
-
-                    console.log(arrayCart);
-
-                    var carrito = {
-                        cart: arrayCart,
-                        shipping: shippingAddress.value,
-                        payment: {
-                            card: cardNumber.value,
-                            name: cardName.value,
-                            date: cardExpire.value,
-                            cvc: cardCvc.value
-                        }
-                    }
-
-                    if (arrayCart.length != 0) {
-
-                        fetch(`http://localhost:3000/cart/pay`, {
-                            method: 'POST',
-                            body: JSON.stringify(carrito),   //body: sessionStorage.getItem("cart")
-                            headers: {
-                                'Content-Type': 'application/json'
-                            }
-                        }).then(function (response) {
-                            if (response.redirected) {
-                                window.location.href = response.url;
-                            }
-                            return response.json();
-                        })                //}).then(response => response.json())
-                            .then(data => {
-                                console.log(data);
-                                sessionStorage.removeItem('cart');
-                                purchaseSuccessful();
-                            })
-                            .catch((error) => {
-                                // console.error('Error:', error);
-                                console.log("NOK");
-                                console.log(error);
-                            });
-                    } else {
-                        alert('NO HAY NADA EN EL CARRITO');
-                    }
-                } else {
-                    alert('NO HAY NADA EN EL CARRITO');
-                }
-
-
-
-
-            })
-
-
-        }
-
-        // THE PURCHASE WAS SUCCESSFUL
-
-        function purchaseSuccessful(){
-            cart.innerHTML =
-                `<p>La compra se realizó con éxito</p>`;
-
-        }
 
         var removeProduct = document.querySelectorAll(".removeProduct");
         var lessProduct = document.querySelectorAll(".lessProduct");
@@ -320,6 +395,7 @@ window.onload = function () {
                     sessionStorage.setItem("cart", JSON.stringify(arrayCart));
                     this.parentNode.parentNode.remove();
 
+                    emptyCart();
                     updateTotal();
                     updateMyCart();
 
@@ -367,10 +443,25 @@ window.onload = function () {
 
     }
 
+    // HIDE OR DISPLAY EMPTY CART
+    function emptyCart() {
+        var emptyCart = document.querySelector('.emptycart');
+        var arrayCart = JSON.parse(sessionStorage.getItem("cart"));
+
+        if (arrayCart.length == 0) {
+            emptyCart.style.display = 'block';
+            payButton.style.display = 'none';
+        } else {
+            emptyCart.style.display = 'none';
+            payButton.style.display = 'inline-block';
+        }
+    }
+
     // ACÁ EMPIEZA LA EJECUCIÓN
 
     updateMyCart();
-    updateFavorites();
+    // updateFavorites();
+    updateFav();                // a ver cómo funciona
     updateProductCart();
 
     // ADD TO FAVORITE
@@ -380,32 +471,36 @@ window.onload = function () {
 
             var productId = this.parentNode.parentNode.querySelector(".productId").value;
 
-            if (sessionStorage.getItem("favorites")) {
-                var arrayFavorites = sessionStorage.getItem("favorites").split(",");
+            // if (sessionStorage.getItem("favorites")) {
+            //     var arrayFavorites = sessionStorage.getItem("favorites").split(",");
 
-                if (arrayFavorites.includes(productId)) {
-                    var index = arrayFavorites.indexOf(productId);
-                    console.log(index);
-                    arrayFavorites.splice(index, 1);
-                    sessionStorage.setItem("favorites", arrayFavorites.join(","));
-                    this.innerHTML = `<svg width="25px" height="25px" viewBox="0 0 16 16" class="bi bi-star" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                    <path fill-rule="evenodd" d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.523-3.356c.329-.314.158-.888-.283-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767l-3.686 1.894.694-3.957a.565.565 0 0 0-.163-.505L1.71 6.745l4.052-.576a.525.525 0 0 0 .393-.288l1.847-3.658 1.846 3.658a.525.525 0 0 0 .393.288l4.052.575-2.906 2.77a.564.564 0 0 0-.163.506l.694 3.957-3.686-1.894a.503.503 0 0 0-.461 0z"/>
-                  </svg>`;
+            //     if (arrayFavorites.includes(productId)) {
+            //         var index = arrayFavorites.indexOf(productId);
+            //         console.log(index);
+            //         arrayFavorites.splice(index, 1);
+            //         sessionStorage.setItem("favorites", arrayFavorites.join(","));
+            //         this.innerHTML = `<svg width="25px" height="25px" viewBox="0 0 16 16" class="bi bi-star" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            //         <path fill-rule="evenodd" d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.523-3.356c.329-.314.158-.888-.283-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767l-3.686 1.894.694-3.957a.565.565 0 0 0-.163-.505L1.71 6.745l4.052-.576a.525.525 0 0 0 .393-.288l1.847-3.658 1.846 3.658a.525.525 0 0 0 .393.288l4.052.575-2.906 2.77a.564.564 0 0 0-.163.506l.694 3.957-3.686-1.894a.503.503 0 0 0-.461 0z"/>
+            //       </svg>`;
 
-                } else {
-                    arrayFavorites.push(productId);
-                    sessionStorage.setItem("favorites", arrayFavorites.join(","));
-                    this.innerHTML = `<svg width="25px" height="25px" viewBox="0 0 16 16" class="bi bi-star-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.283.95l-3.523 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
-                  </svg>`;
-                }
+            //     } else {
+            //         arrayFavorites.push(productId);
+            //         sessionStorage.setItem("favorites", arrayFavorites.join(","));
+            //         this.innerHTML = `<svg width="25px" height="25px" viewBox="0 0 16 16" class="bi bi-star-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            //         <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.283.95l-3.523 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
+            //       </svg>`;
+            //     }
 
-            } else {
-                sessionStorage.setItem("favorites", productId);
-                this.innerHTML = `<svg width="25px" height="25px" viewBox="0 0 16 16" class="bi bi-star-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.283.95l-3.523 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
-                  </svg>`;
-            }
+            // } else {
+            //     sessionStorage.setItem("favorites", productId);
+            //     this.innerHTML = `<svg width="25px" height="25px" viewBox="0 0 16 16" class="bi bi-star-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            //         <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.283.95l-3.523 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
+            //       </svg>`;
+            // }
+
+            // agregar función aquí
+            addToFavorites(productId, this);
+
         })
     }
 
@@ -451,7 +546,6 @@ window.onload = function () {
             updateMyCart();
         })
     }
-
 
     // SHOW PRODUCTS IN CART
     if (cart != null) {                                                 // busca si existe el elemento con clase .carrito (revisar si es correto)

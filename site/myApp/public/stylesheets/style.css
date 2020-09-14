@@ -219,6 +219,14 @@ footer a:hover {
 
 }
 
+.emptycart {
+  border: 1px dashed #DFDFDF;
+  border-radius: 0.25rem;
+  margin-bottom: 5px;
+  background-color: #FFFFFF;
+
+}
+
 .product-image img {
   width: 100%;
   height: 100%;

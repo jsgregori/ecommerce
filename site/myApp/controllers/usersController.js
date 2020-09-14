@@ -9,7 +9,7 @@ const usersFilePath = path.join(__dirname, '../data/users.json');
 const users = JSON.parse(fs.readFileSync(usersFilePath, 'utf-8'));
 
 //Extensiones permitidas para archivos de imagenes
-const extensionesImagen = [".JPG",".jpg",".JPEG",".jpeg",".png",".PNG",".gif",".GIF"]
+const extensionesImagen = [".JPG", ".jpg", ".JPEG", ".jpeg", ".png", ".PNG", ".gif", ".GIF"]
 
 const usersController = {
 
@@ -29,8 +29,8 @@ const usersController = {
 				email: email
 			}
 		}).then((user) => {
-		
-			if(!user){
+
+			if (!user) {
 				res.render('login', {
 					error: 'El usuario no se encuentra registrado',
 					user: undefined
@@ -38,7 +38,7 @@ const usersController = {
 			}
 
 			// 2 Validar la contraseña
-			if(!bcrypt.compareSync(password, user.password)){
+			if (!bcrypt.compareSync(password, user.password)) {
 				res.render('login', {
 					error: 'La contraseña es inválida',
 					user: undefined
@@ -51,8 +51,8 @@ const usersController = {
 			req.session.category = user.category;
 
 			// 4 Generar cookie si se puso recordar
-			if(req.body.remember == 'true'){
-				res.cookie('user', email, {maxAge: 60*60*1000});
+			if (req.body.remember == 'true') {
+				res.cookie('user', email, { maxAge: 60 * 60 * 1000 });
 			}
 
 			// 5 Redirigir el sitio al inicio
@@ -67,7 +67,7 @@ const usersController = {
 		req.session.user = undefined;
 		req.session.category = undefined;
 		req.session.user_id = undefined;
-		res.cookie('user', '', {maxAge: 0});
+		res.cookie('user', '', { maxAge: 0 });
 		res.redirect('/');
 	},
 
@@ -75,16 +75,16 @@ const usersController = {
 		res.render('registro');
 	},
 
-	store: (req,res) => {
+	store: (req, res) => {
 
 		let errors = validationResult(req);
 		console.log(errors);
 		//console.log(req.files[0].filename);
 		//console.log(req.body);
-		if (!errors.isEmpty()){
+		if (!errors.isEmpty()) {
 			//Procesar los errores para enviar a la vista
 			console.log("hasta aquí llegué");
-			return res.render('registro',{errors: errors.errors});
+			return res.render('registro', { errors: errors.errors });
 		}
 
 		const newUser = {
@@ -103,7 +103,7 @@ const usersController = {
 
 	profile: (req, res) => {
 
-		if(req.session.user_id != undefined){ // ESTO DEBE SER UN MIDDLEWARE
+		if (req.session.user_id != undefined) { // ESTO DEBE SER UN MIDDLEWARE
 			db.Usuario.findOne({
 				where: {
 					email: req.session.user
@@ -119,7 +119,7 @@ const usersController = {
 
 	edit: (req, res) => {
 
-		if(req.session.user_id != undefined){ // ESTO DEBE SER UN MIDDLEWARE
+		if (req.session.user_id != undefined) { // ESTO DEBE SER UN MIDDLEWARE
 			db.Usuario.findOne({
 				where: {
 					email: req.session.user
@@ -135,18 +135,18 @@ const usersController = {
 
 	update: (req, res) => {
 
-		if(req.session.user_id != undefined){ // ESTO DEBE SER UN MIDDLEWARE
+		if (req.session.user_id != undefined) { // ESTO DEBE SER UN MIDDLEWARE
 
 			let editUser = null;
 
 			console.log('FILES: ' + req.files);
 
-			if(!req.files[0]){
+			if (!req.files[0]) {
 				editUser = {
 					first_name: req.body.first_name,
 					last_name: req.body.last_name
 				}
-			} else{
+			} else {
 				editUser = {
 					first_name: req.body.first_name,
 					last_name: req.body.last_name,
@@ -170,7 +170,86 @@ const usersController = {
 				res.redirect('/users/profile/');
 			});
 		}
+	},
+
+	addFavorite: (req, res) => {
+
+		db.Usuario.findOne({
+			where: {
+				email: req.session.user
+			}
+		}).then((user) => {
+
+			if (user.dataValues.favorites != null) {
+				var favorites = user.dataValues.favorites.split(",");
+
+				if (favorites.includes(req.body.id)) {
+
+					var index = favorites.indexOf(req.body.id);
+					console.log(index);
+					favorites.splice(index, 1);
+
+					db.Usuario.update({
+						favorites: favorites.join(',')
+					}, {
+						where: {
+							email: req.session.user
+						}
+					}).then(() => {
+						res.json({
+							added: false
+						})
+					});
+
+
+				} else {
+					favorites.push(req.body.id);
+
+					db.Usuario.update({
+						favorites: favorites.join(',')
+					}, {
+						where: {
+							email: req.session.user
+						}
+					}).then(() => {
+						res.json({
+							added: true
+						})
+					});
+
+
+				}
+			} else {
+				db.Usuario.update({
+					favorites: req.body.id
+				}, {
+					where: {
+						email: req.session.user
+					}
+				}).then(() => {
+					res.json({
+						added: true
+					})
+				});
+			}
+
+		});
+	},
+
+	getFavorite: (req, res) => {
+
+		db.Usuario.findOne({
+			where: {
+				email: req.session.user
+			}
+		}).then((user) => {
+			res.json({
+				favorites: user.dataValues.favorites
+			})
+		})
+
 	}
+
 };
 
 module.exports = usersController;
