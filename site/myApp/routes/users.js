@@ -4,6 +4,7 @@ const multer = require('multer');
 const path = require('path');
 const { check, validationResult, body } = require('express-validator');
 const db = require('../database/models');
+const userMiddleware = require('../​middlewares​/userMiddleware');
 
 //Extensiones permitidas para archivos de imagenes
 const extensionesImagen = [".JPG",".jpg",".JPEG",".jpeg",".png",".PNG",".gif",".GIF"]
@@ -56,5 +57,8 @@ router.get('/logout/', usersController.logout);
 router.get('/profile/', usersController.profile);
 router.get('/profile/edit/', usersController.edit);
 router.put('/profile/edit/', upload.any(), usersController.update);
+
+router.get('/favorite', userMiddleware, usersController.getFavorite)
+router.post('/favorite', userMiddleware, usersController.addFavorite);
 
 module.exports = router;
